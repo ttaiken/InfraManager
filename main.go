@@ -9,14 +9,15 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"html"
 	"html/template"
-	"net/http"
-	"os"
 	"log"
-	"regexp"
+	"net/http"
 	"net/url"
+	"os"
+	"regexp"
+
+	//"TalkingData-owl/Godeps/_workspace/src/github.com/gorilla/mux"
 
 	"strconv"
-	"TalkingData-owl/Godeps/_workspace/src/github.com/gorilla/mux"
 )
 
 func main() {
@@ -24,11 +25,13 @@ func main() {
 	//http.Handle("/user/", &Router{config: make(map[string]interface{})})
 	//http.HandleFunc("/infra", InfraHandler)
 	//http.HandleFunc("/login", LoginHandler)
-	router := mux.NewRouter()
-	router.Handle("/", &Router{config: make(map[string]interface{})})
-	router.Handle("/bootstrap/", http.StripPrefix("/", http.FileServer(http.Dir("./static/"))))
+	//router := mux.NewRouter()
+	//router := mux.NewRouter()
+	//router := mux.NewRouter()
+	http.Handle("/", &Router{config: make(map[string]interface{})})
+	http.Handle("/bootstrap/", http.StripPrefix("/", http.FileServer(http.Dir("./static/"))))
 
-	log.Fatal(http.ListenAndServe(":80",router))
+	log.Fatal(http.ListenAndServe(":8000", nil))
 }
 
 type Server struct {
@@ -40,10 +43,9 @@ type Server struct {
 	IP3      string `json:"ip3"`
 }
 
-
 type Paging struct {
 	Last_page int      `json:"last_page"`
-	Data  []Server `json:"data"`
+	Data      []Server `json:"data"`
 }
 
 type Router struct {
@@ -133,7 +135,7 @@ func DelServerHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	var hostname string
 	hostname = queryForm["hostname"][0]
-	println("hostname: ",hostname)
+	println("hostname: ", hostname)
 	info := delServer(hostname)
 	w.Write([]byte(info))
 
@@ -207,22 +209,22 @@ func GetServersHandler(w http.ResponseWriter, r *http.Request) {
 	//filter_type - the first current filter type (if any)
 
 	var sql_select string
-	var page,pagesize int
-	var offset,limit string
+	var page, pagesize int
+	var offset, limit string
 	queryForm, err := url.ParseQuery(r.URL.RawQuery)
 	r.ParseForm()
 
-	pagesize,_ = strconv.Atoi(queryForm["size"][0])
-	page,_ = strconv.Atoi(queryForm["page"][0])
+	pagesize, _ = strconv.Atoi(queryForm["size"][0])
+	page, _ = strconv.Atoi(queryForm["page"][0])
 	limit = queryForm["size"][0]
 	offset = strconv.Itoa(page*pagesize - pagesize)
 
-	fmt.Println("offset: ",offset)
-	fmt.Println("limit: ",limit)
+	fmt.Println("offset: ", offset)
+	fmt.Println("limit: ", limit)
 	//{sortOrder: "asc", pageSize: 10, pageNumber: 1}
 	//sql_select = "select hostname,inet_ntoa(ip1) as ip,os,platform,ip2,ip3 from servers LIMIT 10 OFFSET 10"
-	sql_select = "select hostname,inet_ntoa(ip1) as ip,os,platform,ip2,ip3 from servers LIMIT " + limit +" OFFSET " +offset
-	paging := getServers(sql_select,pagesize)
+	sql_select = "select hostname,inet_ntoa(ip1) as ip,os,platform,ip2,ip3 from servers LIMIT " + limit + " OFFSET " + offset
+	paging := getServers(sql_select, pagesize)
 	println("GetServerHandler")
 	println(sql_select)
 	println()
@@ -269,7 +271,7 @@ func checkUser(username string, userpw string) string {
 
 	return uname
 }
-func delServer(hostname string ) string{
+func delServer(hostname string) string {
 	db, err := sql.Open("mysql", "root:pa55word@tcp(192.168.6.1:3306)/test?charset=utf8")
 	checkError(err)
 	defer db.Close()
@@ -282,9 +284,9 @@ func delServer(hostname string ) string{
 	return "Deleted: " + fmt.Sprintf("%d", num) + " row"
 }
 
-func getServers(sql_select string,pagesize int ) Paging {
+func getServers(sql_select string, pagesize int) Paging {
 	paging := Paging{}
-	var totalrow,totalpage int
+	var totalrow, totalpage int
 	db, err := sql.Open("mysql", "root:pa55word@tcp(192.168.6.1:3306)/test?charset=utf8")
 	checkError(err)
 	defer db.Close()
@@ -311,10 +313,10 @@ func getServers(sql_select string,pagesize int ) Paging {
 	db.Close()
 
 	if totalrow%pagesize == 0 {
-		totalpage = totalrow/pagesize
-	}else{
-		totalpage = totalrow/pagesize +1
+		totalpage = totalrow / pagesize
+	} else {
+		totalpage = totalrow/pagesize + 1
 	}
-	paging = Paging{Last_page:totalpage,Data:servers}
+	paging = Paging{Last_page: totalpage, Data: servers}
 	return paging
 }
