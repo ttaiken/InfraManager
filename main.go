@@ -14,24 +14,18 @@ import (
 	"net/url"
 	"os"
 	"regexp"
-
-	//"TalkingData-owl/Godeps/_workspace/src/github.com/gorilla/mux"
-
 	"strconv"
 )
 
 func main() {
+	//router := mux.NewRouter()
+	//router.Handle("/", &Router{config: make(map[string]interface{})})
+	//router.Handle("/bootstrap/", http.StripPrefix("/", http.FileServer(http.Dir("./static/"))))
 
-	//http.Handle("/user/", &Router{config: make(map[string]interface{})})
-	//http.HandleFunc("/infra", InfraHandler)
-	//http.HandleFunc("/login", LoginHandler)
-	//router := mux.NewRouter()
-	//router := mux.NewRouter()
-	//router := mux.NewRouter()
 	http.Handle("/", &Router{config: make(map[string]interface{})})
 	http.Handle("/bootstrap/", http.StripPrefix("/", http.FileServer(http.Dir("./static/"))))
-
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	//http.HandleFunc("/login", LoginHandler)
+	log.Fatal(http.ListenAndServe(":80", nil))
 }
 
 type Server struct {
