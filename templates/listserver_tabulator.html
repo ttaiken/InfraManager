@@ -1,0 +1,79 @@
+{{ define "content" }}
+<div id="cnotent">
+    <div>
+        <button id="add-row">Add Row</button>
+        <button id="delete-row">Delete Row</button>
+        <button id="history-undo">Undo</button>
+        <button type="button" id="history-redo">Redo</button>
+        <input type="checkbox" id="allitems" >
+    </div>
+    <div id="table-servers"></div>
+</div>
+
+{{end}}
+{{ define "customizeScript" }}
+<script>
+$(document).ready(function() {
+  $("#table-servers").tabulator({
+    pagination:"remote", 
+    paginationSize: 6,
+    ajaxURL: "http://192.168.6.1/infra/getservers",
+    ajaxParams:{token:"ABC123"},
+    tooltips:true,
+    addRowPos:"top",
+    history:true,
+    movableColumns:true,
+    //dataEdited:function(data){ alert(data[0].hostname)},
+    
+    cellEdited:function(cell){
+        row = cell.getRow()
+        alert(cell.getColumn().getField() + " - " + cell.getValue())
+        alert(cell.getRow().getData().hostname)//+row.os +row.platform)
+    },
+    fitColumns:true,
+    initialSort:[ {column:"hostname", dir:"asc"},],
+    columns:[ 
+        {title:"<input type='checkbox' id='checkall' />", field: "hostname",formatter:function(cell, formatterParams){
+         return "<input type='checkbox' name='checkitem' value='" +
+            cell.getValue()+ "' />";
+        
+        },width:50},
+        {title:"hostname", field:"hostname", width:150,editor:"input",
+          dataEdited:function(data){ alert(data[0].hostname)},rowEdit:function(id, data, row){alert(row)}},
+        {title:"ip", field:"ip",editor:"input"},
+        {title:"os", field:"os",editor:"input"},
+        {title:"platform", field:"platform", align:"center",editor:"input"},
+    ]
+  });
+
+
+    $("#add-row").on("click", function(){
+        $("#table-servers").tabulator("addRow",{} , true ); 
+      });
+    $("#delete-row").on("click", function(){
+      var items = [];
+        item=$('[name="checkitem"]:checked').each(function(index,elem){
+            items.push($(this).val());}); 
+        window.alert(items);
+        //$("#table-servers").tabulator("addRow",{} , true ); 
+      });
+    $("#history-undo").on("click", function(){
+        $("#table-servers").tabulator("undo");
+    });
+    $("#history-redo").on("click", function(){
+        $("#table-servers").tabulator("redo");
+    });
+
+    $("#allitems").on("click",function(){
+        if(this.checked){
+            $("[name=checkitem]").attr("checked",true);
+        }else{ 
+            $("[name=checkitem]").attr("checked",false);
+        }
+    });
+
+});
+
+
+</script>
+{{end}}

@@ -9,15 +9,16 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"html"
 	"html/template"
-	"log"
 	"net/http"
-	"net/url"
 	"os"
+	"log"
 	"regexp"
+	"net/url"
 	"strconv"
 )
 
 func main() {
+
 	//router := mux.NewRouter()
 	//router.Handle("/", &Router{config: make(map[string]interface{})})
 	//router.Handle("/bootstrap/", http.StripPrefix("/", http.FileServer(http.Dir("./static/"))))
@@ -25,7 +26,7 @@ func main() {
 	http.Handle("/", &Router{config: make(map[string]interface{})})
 	http.Handle("/bootstrap/", http.StripPrefix("/", http.FileServer(http.Dir("./static/"))))
 	//http.HandleFunc("/login", LoginHandler)
-	log.Fatal(http.ListenAndServe(":80", nil))
+	log.Fatal(http.ListenAndServe(":80",nil))
 }
 
 type Server struct {
@@ -37,9 +38,10 @@ type Server struct {
 	IP3      string `json:"ip3"`
 }
 
+
 type Paging struct {
 	Last_page int      `json:"last_page"`
-	Data      []Server `json:"data"`
+	Data  []Server `json:"data"`
 }
 
 type Router struct {
@@ -129,7 +131,7 @@ func DelServerHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	var hostname string
 	hostname = queryForm["hostname"][0]
-	println("hostname: ", hostname)
+	println("hostname: ",hostname)
 	info := delServer(hostname)
 	w.Write([]byte(info))
 
@@ -194,31 +196,30 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetServersHandler(w http.ResponseWriter, r *http.Request) {
-	//page - the page number being requested
-	//size - the number of rows to a page (if paginationSize is set)
-	//sort - the first currently sorted field (if any)
-	//sort_dir - the first currently sort direction (if any)
-	//filter - the first currently filtered field (if any)
-	//filter_value - the first current filter value (if any)
-	//filter_type - the first current filter type (if any)
 
 	var sql_select string
-	var page, pagesize int
-	var offset, limit string
-	queryForm, err := url.ParseQuery(r.URL.RawQuery)
-	r.ParseForm()
-
-	pagesize, _ = strconv.Atoi(queryForm["size"][0])
-	page, _ = strconv.Atoi(queryForm["page"][0])
-	limit = queryForm["size"][0]
+	var page,pagesize int
+	var offset,limit string
+	if r.Method == "GET" {
+		queryForm, err := url.ParseQuery(r.URL.RawQuery)
+		checkError(err)
+		r.ParseForm()
+		limit = queryForm["size"][0]
+		page, _ = strconv.Atoi(queryForm["page"][0])
+	}else if r.Method == "POST" {
+		//r.MultipartForm.Value["id"]
+		limit = r.PostFormValue("size")
+		page,_ = strconv.Atoi(r.PostFormValue("page"))
+	}
+	pagesize,_ = strconv.Atoi(limit)
 	offset = strconv.Itoa(page*pagesize - pagesize)
 
-	fmt.Println("offset: ", offset)
-	fmt.Println("limit: ", limit)
+	fmt.Println("offset: ",offset)
+	fmt.Println("limit: ",limit)
 	//{sortOrder: "asc", pageSize: 10, pageNumber: 1}
 	//sql_select = "select hostname,inet_ntoa(ip1) as ip,os,platform,ip2,ip3 from servers LIMIT 10 OFFSET 10"
-	sql_select = "select hostname,inet_ntoa(ip1) as ip,os,platform,ip2,ip3 from servers LIMIT " + limit + " OFFSET " + offset
-	paging := getServers(sql_select, pagesize)
+	sql_select = "select hostname,inet_ntoa(ip1) as ip,os,platform,ip2,ip3 from servers LIMIT " + limit +" OFFSET " +offset
+	paging := getServers(sql_select,pagesize)
 	println("GetServerHandler")
 	println(sql_select)
 	println()
@@ -265,7 +266,7 @@ func checkUser(username string, userpw string) string {
 
 	return uname
 }
-func delServer(hostname string) string {
+func delServer(hostname string ) string{
 	db, err := sql.Open("mysql", "root:pa55word@tcp(192.168.6.1:3306)/test?charset=utf8")
 	checkError(err)
 	defer db.Close()
@@ -278,9 +279,9 @@ func delServer(hostname string) string {
 	return "Deleted: " + fmt.Sprintf("%d", num) + " row"
 }
 
-func getServers(sql_select string, pagesize int) Paging {
+func getServers(sql_select string,pagesize int ) Paging {
 	paging := Paging{}
-	var totalrow, totalpage int
+	var totalrow,totalpage int
 	db, err := sql.Open("mysql", "root:pa55word@tcp(192.168.6.1:3306)/test?charset=utf8")
 	checkError(err)
 	defer db.Close()
@@ -307,10 +308,10 @@ func getServers(sql_select string, pagesize int) Paging {
 	db.Close()
 
 	if totalrow%pagesize == 0 {
-		totalpage = totalrow / pagesize
-	} else {
-		totalpage = totalrow/pagesize + 1
+		totalpage = totalrow/pagesize
+	}else{
+		totalpage = totalrow/pagesize +1
 	}
-	paging = Paging{Last_page: totalpage, Data: servers}
+	paging = Paging{Last_page:totalpage,Data:servers}
 	return paging
 }

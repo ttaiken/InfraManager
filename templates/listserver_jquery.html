@@ -3,31 +3,11 @@
 <div class="panel panel-info" id="cnotent">
     <div class="panel-heading">
         <p>ServerList</p>
-        <ul class="breadcrumb">
-            <li>
-                <i class="icon-home"></i>
-                <a href="index.html">Home</a> 
-                <i class="icon-angle-right"></i>
-            </li>
-            <li>
-                <a href="#">Data Tables</a>
-                <i class="icon-angle-right"></i>
-            </li>
-            <li><a href="#">Managed Tables</a></li>
-        </ul>
-
         Functions:
         <button id="add-row">Add Row</button>
         <button id="delete-row">Delete Row</button>
         <button id="history-undo">Undo</button>
         <button type="button" id="history-redo">Redo</button>
-
-        <select class="form-control" onchange="selectOnchang(this)">
-            <option>Ping</option>
-            <option>Delete</option>            
-            <option>Edit</option>
-            <option>Save</option>
-        </select>
              
     </div>
     <div>
@@ -125,10 +105,6 @@ function listServers(pagenum,pagesize){
             $("[name=checkitem]").attr("checked",false);
         }
     });
-    function selectOnchang(obj){ 
-
-        alert(obj.selectedIndex);
-    }
 
 </script>
 {{end}}
