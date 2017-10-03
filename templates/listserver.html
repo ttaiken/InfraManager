@@ -19,16 +19,16 @@
         Functions:
         <button id="add-row">Add Row</button>
         <button id="delete-row">Delete Row</button>
-        <button id="history-undo">Undo</button>
+        
         <button type="button" id="history-redo">Redo</button>
 
-        <select class="form-control" onchange="selectOnchang(this)">
+        <select id="cmd-option" class="form-control" onchange="selectOnchang(this)" style="width:100px;">
             <option>Ping</option>
             <option>Delete</option>            
             <option>Edit</option>
             <option>Save</option>
         </select>
-             
+        <button id="cmd-run">Run</button>
     </div>
     <div>
         <table class="table table-hover" id="table-servers" data-URL="/infra/getservers">
@@ -58,58 +58,71 @@
 <script>
 $(document).ready(function() {
     //var pagenum = 1;
-    //var pagesize = 5;
-    //var apiURL="/infra/getservers";
+    var apiData="page=1&size=5";
+    var apiURL=$("#table-servers").attr("data-URL");
     listServers(1,5);
 
     
 
 });
+
+function deleteServers(items)
+{	
+	var apiData="data="+items;
+	var apiURL="/infra/delservers"
+	$.ajax({
+        url:apiURL,  
+        data:apiData,
+        dataType: "json",
+        type:'post',  
+        success:function(data){alert(data);}
+    });
+
+}
 function listServers(pagenum,pagesize){
-        var apiURL = $("#table-servers").attr("data-URL");
-        $('[class="pagination"]').attr("data-pnum",pagenum);
-        $('[class="pagination"]').attr("data-psize",pagesize);
-        $.ajax({
-            url:apiURL,  
-            data:"page=" + pagenum + "&size=" + pagesize,
-            dataType: "json",
-            type:'post',  
-            success:function(data){  
-                var item;
-                $("table tbody").empty(); 
-                $("#table-servers").show(); 
-                $.each(data['data'],function(i,result){  
+    var apiURL = $("#table-servers").attr("data-URL");
+    $('[class="pagination"]').attr("data-pnum",pagenum);
+    $('[class="pagination"]').attr("data-psize",pagesize);
+    $.ajax({
+        url:apiURL,  
+        data:"page=" + pagenum + "&size=" + pagesize,
+        dataType: "json",
+        type:'post',  
+        success:function(data){  
 
-                    item = "<tr><td><input type='checkbox' name='checkitem' value='" +result['hostname'] +
-                            "'></td><td>"+result['hostname']+"</td><td>"+result['ip']+
-                            "</td><td>"+result['os']+"</td><td>"+result['platform']+
-                            "</td><td>"+"操作</td></tr>";  
-                    $('#table-servers').append(item);
-                    
-                });  
+            var item;
+            $("table tbody").empty(); 
+            $("#table-servers").show(); 
+            $.each(data['data'],function(i,result){  
 
-                $('[class="pagination"]').empty(); 
-                $('[class="pagination"]').append('<li><a href="#">&laquo;</a></li>');
-                var lastPage = data['last_page']
-                for(var i = 1; i<=lastPage; i++){
-                    
-                    if(i==pagenum){
-                        var li_html = '<li class="active"><a href="#">' + i + '</a></li>'
-                    }else{
-                        var li_html = '<li><a href="javascript:void(0);" onclick="listServers('+i+',5)">' + i + '</a></li>'
-                    }
-                    $('[class="pagination"]').append(li_html);
+                item = "<tr><td><input type='checkbox' name='checkitem' value='" +result['hostname'] +
+                        "'></td><td>"+result['hostname']+"</td><td>"+result['ip']+
+                        "</td><td>"+result['os']+"</td><td>"+result['platform']+
+                        "</td><td>"+"操作</td></tr>";  
+                $('#table-servers').append(item);
+                
+            });  
+
+            $('[class="pagination"]').empty(); 
+            $('[class="pagination"]').append('<li><a href="#">&laquo;</a></li>');
+            var lastPage = data['last_page']
+            for(var i = 1; i<=lastPage; i++){
+                
+                if(i==pagenum){
+                    var li_html = '<li class="active"><a href="#">' + i + '</a></li>'
+                }else{
+                    var li_html = '<li><a href="javascript:void(0);" onclick="listServers('+i+',5)">' + i + '</a></li>'
                 }
-                $('[class="pagination"]').append('<li><a href="#">&raquo;</a></li>');
+                $('[class="pagination"]').append(li_html);
             }
+            $('[class="pagination"]').append('<li><a href="#">&raquo;</a></li>');
+        }
               
-        });
+    });
             
     }
 
-    $("#add-row").on("click", function(){
-        
-      });
+
     $("#delete-row").on("click", function(){
         var items = [];
         item=$('[name="checkitem"]:checked').each(function(index,elem){
@@ -125,10 +138,37 @@ function listServers(pagenum,pagesize){
             $("[name=checkitem]").attr("checked",false);
         }
     });
+    $("#cmd-run").on("click",function(){
+        var action = $("#cmd-option").find("option:selected").text();
+        switch(action){
+			case "Ping":			
+				Ping();
+				break;
+			case "Delete":
+				Delete();
+				break;
+			default:
+				alert("function not define!");
+		};
+
+    });
     function selectOnchang(obj){ 
-
-        alert(obj.selectedIndex);
+        //alert(obj.selectedIndex);
+        //var action = obj.options[obj.selectedIndex].value;
     }
-
+    function Ping(){
+    	var items = [];
+        item=$('[name="checkitem"]:checked').each(function(index,elem){
+            items.push($(this).val());}); 
+        window.alert("ping "+items);
+        
+    };
+    function Delete(){
+    	var items = [];
+        item=$('[name="checkitem"]:checked').each(function(index,elem){
+            items.push($(this).val());}); 
+        window.alert("delete "+items);
+        //deleteServers(items);
+    };
 </script>
 {{end}}

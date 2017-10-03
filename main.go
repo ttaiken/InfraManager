@@ -15,6 +15,8 @@ import (
 	"regexp"
 	"net/url"
 	"strconv"
+	"strings"
+	"./tools"
 )
 
 func main() {
@@ -27,9 +29,13 @@ func main() {
 	http.Handle("/bootstrap/", http.StripPrefix("/", http.FileServer(http.Dir("./static/"))))
 	//http.HandleFunc("/login", LoginHandler)
 	log.Fatal(http.ListenAndServe(":80",nil))
+
 }
 
+
+
 type Server struct {
+	ID		 int	`id`
 	Hostname string `json:"hostname"`
 	IP       string `json:"ip"`
 	OS       string `json:"os"`
@@ -53,9 +59,9 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var infra = regexp.MustCompile(`^/infra$`)
 	var infra_listServer = regexp.MustCompile(`^/infra/listserver$`)
 	var infra_getServers = regexp.MustCompile(`^/infra/getservers$`)
-	var infra_delServer = regexp.MustCompile(`^/infra/delserver$`)
+	var infra_delServers = regexp.MustCompile(`^/infra/delservers$`)
 	var admin_login = regexp.MustCompile(`^/admin/login$`)
-
+	var infra_ping = regexp.MustCompile(`^/infra/ping$`)
 	//var logout = regexp.MustCompile(`^/user/logout`)
 	//var addUser = regexp.MustCompile(`^/user/adduser`)
 	//var delUser = regexp.MustCompile(`^/user/deluser`)
@@ -67,19 +73,40 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case infra.MatchString(r.URL.Path):
 		InfraHandler(w, r)
 	case infra_listServer.MatchString(r.URL.Path):
+		fmt.Println("Forward to ListServerHandler")
 		ListServerHandler(w, r)
+
 	case infra_getServers.MatchString(r.URL.Path):
 		GetServersHandler(w, r)
-	case infra_delServer.MatchString(r.URL.Path):
-		DelServerHandler(w, r)
+	case infra_delServers.MatchString(r.URL.Path):
+		DelServersHandler(w, r)
 	case admin_login.MatchString(r.URL.Path):
 		LoginHandler(w, r)
+	case infra_ping.MatchString(r.URL.Path):
+		PingHandler(w,r)
 
 	default:
-		fmt.Fprintf(w, "No Registed form %q", html.EscapeString(r.URL.Path))
-
+		//fmt.Fprintf(w, "err:Not Registed to %q", html.EscapeString(r.URL.Path))
+		fmt.Fprintf(w, "err:\"Not Registed to "+ html.EscapeString(r.URL.Path)+"\"")
 	}
+	fmt.Println("ServeHTTP finished!")
 
+}
+
+func PingHandler(w http.ResponseWriter, r *http.Request) {
+	pingres := tools.Ping("192.168.6.5")
+	// pingres.MaxDelay + "','" + pingres.MinDelay + "','" + pingres.AvgDelay + "','" + pingres.SendPk + "','" + pingres.RevcPk + "','" + pingres.LossPk
+	fmt.Println(pingres)
+	w.Write([]byte(pingres.SendPk))
+	//type Target struct {
+	//Name        string
+	//Addr        string
+	//Type        string
+	//Thdchecksec int
+	//Thdoccnum   int
+	//Thdavgdelay int
+	//Thdloss     int
+	//}
 }
 
 const (
@@ -124,17 +151,56 @@ func ListServerHandler(w http.ResponseWriter, r *http.Request) {
 	checkError(err)
 	err = t.ExecuteTemplate(w, "layout", param)
 	checkError(err)
+	fmt.Println("ListServer finishied")
 }
-func DelServerHandler(w http.ResponseWriter, r *http.Request) {
-	queryForm, err := url.ParseQuery(r.URL.RawQuery)
-	checkError(err)
-	r.ParseForm()
-	var hostname string
-	hostname = queryForm["hostname"][0]
-	println("hostname: ",hostname)
-	info := delServer(hostname)
-	w.Write([]byte(info))
+func GetServersHandler(w http.ResponseWriter, r *http.Request) {
 
+	var sql_select string
+	var page,pagesize int
+	var offset,limit string
+	if r.Method == "GET" {
+		queryForm, err := url.ParseQuery(r.URL.RawQuery)
+		checkError(err)
+		r.ParseForm()
+		limit = queryForm["size"][0]
+		page, _ = strconv.Atoi(queryForm["page"][0])
+	}else if r.Method == "POST" {
+		//r.MultipartForm.Value["id"]
+		limit = r.PostFormValue("size")
+		page,_ = strconv.Atoi(r.PostFormValue("page"))
+	}
+	pagesize,_ = strconv.Atoi(limit)
+	offset = strconv.Itoa(page*pagesize - pagesize)
+
+	fmt.Println("offset: ",offset)
+	fmt.Println("limit: ",limit)
+	//{sortOrder: "asc", pageSize: 10, pageNumber: 1}
+	//sql_select = "select hostname,inet_ntoa(ip1) as ip,os,platform,ip2,ip3 from servers LIMIT 10 OFFSET 10"
+	sql_select = "select server_id,hostname,inet_ntoa(ip1) as ip,os,platform,ip2,ip3 from servers LIMIT " + limit +" OFFSET " +offset
+	paging := getServers(sql_select,pagesize)
+	json_paging, err := json.Marshal(paging)
+	checkError(err)
+	w.Header().Set("Content-type", "application/json")
+
+	_, err = w.Write(json_paging)
+	checkError(err)
+}
+func DelServersHandler(w http.ResponseWriter, r *http.Request) {
+	var data string
+    var items []string
+	if r.Method == "POST" {
+		data = r.PostFormValue("data")
+		if(data !=""){
+			items = strings.Split(data,",")
+		}
+
+	}
+	fmt.Println("itesms:",items)
+	for i:=0;i<len(items);i++ {
+		go delServer(items[i])
+	}
+
+	w.Write([]byte("ok"))
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -195,46 +261,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetServersHandler(w http.ResponseWriter, r *http.Request) {
 
-	var sql_select string
-	var page,pagesize int
-	var offset,limit string
-	if r.Method == "GET" {
-		queryForm, err := url.ParseQuery(r.URL.RawQuery)
-		checkError(err)
-		r.ParseForm()
-		limit = queryForm["size"][0]
-		page, _ = strconv.Atoi(queryForm["page"][0])
-	}else if r.Method == "POST" {
-		//r.MultipartForm.Value["id"]
-		limit = r.PostFormValue("size")
-		page,_ = strconv.Atoi(r.PostFormValue("page"))
-	}
-	pagesize,_ = strconv.Atoi(limit)
-	offset = strconv.Itoa(page*pagesize - pagesize)
-
-	fmt.Println("offset: ",offset)
-	fmt.Println("limit: ",limit)
-	//{sortOrder: "asc", pageSize: 10, pageNumber: 1}
-	//sql_select = "select hostname,inet_ntoa(ip1) as ip,os,platform,ip2,ip3 from servers LIMIT 10 OFFSET 10"
-	sql_select = "select hostname,inet_ntoa(ip1) as ip,os,platform,ip2,ip3 from servers LIMIT " + limit +" OFFSET " +offset
-	paging := getServers(sql_select,pagesize)
-	println("GetServerHandler")
-	println(sql_select)
-	println()
-	//servers := paging["Rows"]
-	//json_server, err := json.Marshal(servers)
-	json_paging, err := json.Marshal(paging)
-	checkError(err)
-	//fmt.Println("servers: ", paging)
-	//fmt.Println("dict: ", json_paging)
-	//w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Header().Set("Content-type", "application/json")
-
-	_, err = w.Write(json_paging)
-	checkError(err)
-}
 
 func InfraHandler(w http.ResponseWriter, r *http.Request) {
 	dumx := Authentication{Name: "guest", Token: "guest"}
@@ -258,7 +285,7 @@ func checkError(err error) {
 }
 func checkUser(username string, userpw string) string {
 	var uname, upw string
-	db, err := sql.Open("mysql", "root:pa55word@tcp(192.168.6.1:3306)/test?charset=utf8")
+	db, err := sql.Open("mysql", "root:pa55word@tcp(192.168.6.5:3306)/test?charset=utf8")
 	checkError(err)
 	defer db.Close()
 	row := db.QueryRow("SELECT user_name,user_pw FROM auth WHERE user_name=? and user_pw=?", username, userpw)
@@ -267,7 +294,7 @@ func checkUser(username string, userpw string) string {
 	return uname
 }
 func delServer(hostname string ) string{
-	db, err := sql.Open("mysql", "root:pa55word@tcp(192.168.6.1:3306)/test?charset=utf8")
+	db, err := sql.Open("mysql", "root:pa55word@tcp(192.168.6.5:3306)/test?charset=utf8")
 	checkError(err)
 	defer db.Close()
 	stmt, err := db.Prepare(`DELETE FROM servers WHERE hostname=?`)
@@ -282,7 +309,7 @@ func delServer(hostname string ) string{
 func getServers(sql_select string,pagesize int ) Paging {
 	paging := Paging{}
 	var totalrow,totalpage int
-	db, err := sql.Open("mysql", "root:pa55word@tcp(192.168.6.1:3306)/test?charset=utf8")
+	db, err := sql.Open("mysql", "root:pa55word@tcp(192.168.6.5:3306)/test?charset=utf8")
 	checkError(err)
 	defer db.Close()
 
@@ -295,8 +322,10 @@ func getServers(sql_select string,pagesize int ) Paging {
 	server := Server{}
 	servers := []Server{}
 	var hostname, ip, platform, os_filed, ip2, ip3 string
+	var server_id int
 	for rows.Next() {
-		rows.Scan(&hostname, &ip, &platform, &os_filed, &ip2, &ip3)
+		rows.Scan(&server_id,&hostname, &ip, &platform, &os_filed, &ip2, &ip3)
+		server.ID = server_id
 		server.Hostname = hostname
 		server.IP = ip
 		server.OS = os_filed

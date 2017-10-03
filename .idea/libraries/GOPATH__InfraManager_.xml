@@ -1,0 +1,51 @@
+<component name="libraryTable">
+  <library name="GOPATH &lt;InfraManager&gt;">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/../go.uber.org" />
+      <root url="file://$PROJECT_DIR$/../smartping-master" />
+      <root url="file://$PROJECT_DIR$/../go4.org" />
+      <root url="file://$PROJECT_DIR$/../exPing" />
+      <root url="file://$PROJECT_DIR$/../smartping" />
+      <root url="file://$PROJECT_DIR$/../test03" />
+      <root url="file://$PROJECT_DIR$/../test02" />
+      <root url="file://$PROJECT_DIR$/../test01" />
+      <root url="file://$PROJECT_DIR$/../owl" />
+      <root url="file://$PROJECT_DIR$/../github.com" />
+      <root url="file://$PROJECT_DIR$/../golang.org" />
+      <root url="file://$PROJECT_DIR$/../TalkingData-owl" />
+      <root url="file://$PROJECT_DIR$/../InfraManager_bk" />
+      <root url="file://$PROJECT_DIR$/../collectd.org" />
+      <root url="file://$PROJECT_DIR$/../gopkg.in" />
+      <root url="file://$PROJECT_DIR$/../DCManager" />
+      <root url="file://$PROJECT_DIR$/../tools" />
+      <root url="file://$PROJECT_DIR$/../qor-example-master" />
+      <root url="file://$PROJECT_DIR$/../rtop-master" />
+      <root url="file://$PROJECT_DIR$/../mtools" />
+    </CLASSES>
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/../go.uber.org" />
+      <root url="file://$PROJECT_DIR$/../smartping-master" />
+      <root url="file://$PROJECT_DIR$/../go4.org" />
+      <root url="file://$PROJECT_DIR$/../exPing" />
+      <root url="file://$PROJECT_DIR$/../smartping" />
+      <root url="file://$PROJECT_DIR$/../test03" />
+      <root url="file://$PROJECT_DIR$/../test02" />
+      <root url="file://$PROJECT_DIR$/../test01" />
+      <root url="file://$PROJECT_DIR$/../owl" />
+      <root url="file://$PROJECT_DIR$/../github.com" />
+      <root url="file://$PROJECT_DIR$/../golang.org" />
+      <root url="file://$PROJECT_DIR$/../TalkingData-owl" />
+      <root url="file://$PROJECT_DIR$/../InfraManager_bk" />
+      <root url="file://$PROJECT_DIR$/../collectd.org" />
+      <root url="file://$PROJECT_DIR$/../gopkg.in" />
+      <root url="file://$PROJECT_DIR$/../DCManager" />
+      <root url="file://$PROJECT_DIR$/../tools" />
+      <root url="file://$PROJECT_DIR$/../qor-example-master" />
+      <root url="file://$PROJECT_DIR$/../rtop-master" />
+      <root url="file://$PROJECT_DIR$/../mtools" />
+    </SOURCES>
+    <excluded>
+      <root url="file://$PROJECT_DIR$" />
+    </excluded>
+  </library>
+</component>
