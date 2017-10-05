@@ -13,12 +13,13 @@ import (
 )
 
 type PingSt struct {
-	SendPk   string
-	RevcPk   string
-	LossPk   string
-	MinDelay string
-	AvgDelay string
-	MaxDelay string
+	Addr	 string `json:"addr"`
+	SendPk   string `json:"sendpk"`
+	RevcPk   string	`json:"revcpk"`
+	LossPk   string `json:"losspk"`
+	MinDelay string `json:"mindelay"`
+	AvgDelay string `json:"avgdelay"`
+	MaxDelay string `json:"maxdelay"`
 }
 
 func pingLinux(Addr string) PingSt {
@@ -30,6 +31,7 @@ func pingLinux(Addr string) PingSt {
 	}
 	cmd.Start()
 	reader := bufio.NewReader(stdout)
+	ps.Addr = Addr
 	ps.MinDelay = "0"
 	ps.AvgDelay = "0"
 	ps.MaxDelay = "0"
@@ -62,12 +64,13 @@ func pingLinux(Addr string) PingSt {
 func pingWindows(Addr string) PingSt {
 	var ps PingSt
 	var fps PingSt
+	fps.Addr = Addr
 	fps.SendPk = "20"
 	fps.RevcPk = "0"
 	fps.MaxDelay = "0"
 	fps.MinDelay = "3000"
 	fps.AvgDelay = "0"
-	for ic := 0; ic < 20; ic++ {
+	for ic := 0; ic < 4; ic++ {
 		start := time.Now()
 		cmd := exec.Command("ping", "-w", "3000", "-n", "1", Addr)
 		stdout, err := cmd.StdoutPipe()
@@ -76,6 +79,7 @@ func pingWindows(Addr string) PingSt {
 		}
 		cmd.Start()
 		reader := bufio.NewReader(stdout)
+		ps.Addr = Addr
 		ps.RevcPk = "0"
 		ps.MaxDelay = "0"
 		//ps.MinDelay = "3000"

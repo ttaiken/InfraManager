@@ -39,7 +39,7 @@
                     <th>ip</th>
                     <th>os</th>
                     <th>platform</th>
-                    <th>opration</th>
+                    <th>Ping</th>
                 </tr>
             </thead>
             <tbody>
@@ -66,6 +66,34 @@ $(document).ready(function() {
 
 });
 
+function pingServers(items)
+{	
+	var apiData="data="+items;
+	var apiURL="/infra/ping"
+	$.ajax({
+        url:apiURL,  
+        data:apiData,
+        dataType: "json",
+        type:'post',  
+        success:function(data){
+        	$.each( data, function(index,item){ 
+			    $("#table-servers").find("tr").each(function () {
+			　　if ($(this).children('td:eq(1)').text() == item['addr']) {
+					if(item['losspk']==0) {$(this).children('td:eq(5)').html("normal");}
+					else if(item['losspk']==100) {$(this).children('td:eq(5)').html("down!");}
+					else {$(this).children('td:eq(5)').html("unstable:"+item['losspk']);}
+			　　};
+			});
+			}); 
+
+
+        	//`addr`,`sendpk`,`revcpk`,`losspk`,`mindelay`,`avgdelay`,`maxdelay`
+			
+        }
+    });
+
+}
+
 function deleteServers(items)
 {	
 	var apiData="data="+items;
@@ -89,7 +117,6 @@ function listServers(pagenum,pagesize){
         dataType: "json",
         type:'post',  
         success:function(data){  
-
             var item;
             $("table tbody").empty(); 
             $("#table-servers").show(); 
@@ -158,14 +185,15 @@ function listServers(pagenum,pagesize){
     }
     function Ping(){
     	var items = [];
-        item=$('[name="checkitem"]:checked').each(function(index,elem){
+        $('[name="checkitem"]:checked').each(function(index,elem){
             items.push($(this).val());}); 
         window.alert("ping "+items);
+        pingServers(items);        
         
     };
     function Delete(){
     	var items = [];
-        item=$('[name="checkitem"]:checked').each(function(index,elem){
+        $('[name="checkitem"]:checked').each(function(index,elem){
             items.push($(this).val());}); 
         window.alert("delete "+items);
         //deleteServers(items);

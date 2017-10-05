@@ -2,6 +2,7 @@ package main
 
 import (
 	"InfraManager/auth"
+	"InfraManager/tools"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -9,33 +10,24 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"html"
 	"html/template"
-	"net/http"
-	"os"
 	"log"
-	"regexp"
+	"net/http"
 	"net/url"
+	"os"
+	"regexp"
 	"strconv"
 	"strings"
-	"./tools"
 )
 
 func main() {
-
-	//router := mux.NewRouter()
-	//router.Handle("/", &Router{config: make(map[string]interface{})})
-	//router.Handle("/bootstrap/", http.StripPrefix("/", http.FileServer(http.Dir("./static/"))))
-
 	http.Handle("/", &Router{config: make(map[string]interface{})})
 	http.Handle("/bootstrap/", http.StripPrefix("/", http.FileServer(http.Dir("./static/"))))
 	//http.HandleFunc("/login", LoginHandler)
-	log.Fatal(http.ListenAndServe(":80",nil))
-
+	log.Fatal(http.ListenAndServe(":80", nil))
 }
 
-
-
 type Server struct {
-	ID		 int	`id`
+	ID       int    `json:"id"`
 	Hostname string `json:"hostname"`
 	IP       string `json:"ip"`
 	OS       string `json:"os"`
@@ -44,10 +36,9 @@ type Server struct {
 	IP3      string `json:"ip3"`
 }
 
-
 type Paging struct {
 	Last_page int      `json:"last_page"`
-	Data  []Server `json:"data"`
+	Data      []Server `json:"data"`
 }
 
 type Router struct {
@@ -62,12 +53,8 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var infra_delServers = regexp.MustCompile(`^/infra/delservers$`)
 	var admin_login = regexp.MustCompile(`^/admin/login$`)
 	var infra_ping = regexp.MustCompile(`^/infra/ping$`)
-	//var logout = regexp.MustCompile(`^/user/logout`)
-	//var addUser = regexp.MustCompile(`^/user/adduser`)
-	//var delUser = regexp.MustCompile(`^/user/deluser`)
 
 	switch {
-
 	case home.MatchString(r.URL.Path):
 		HomeHandler(w, r)
 	case infra.MatchString(r.URL.Path):
@@ -83,40 +70,45 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case admin_login.MatchString(r.URL.Path):
 		LoginHandler(w, r)
 	case infra_ping.MatchString(r.URL.Path):
-		PingHandler(w,r)
-
+		PingHandler(w, r)
 	default:
 		//fmt.Fprintf(w, "err:Not Registed to %q", html.EscapeString(r.URL.Path))
-		fmt.Fprintf(w, "err:\"Not Registed to "+ html.EscapeString(r.URL.Path)+"\"")
+		fmt.Fprintf(w, "err:\"Not Registed to "+html.EscapeString(r.URL.Path)+"\"")
 	}
 	fmt.Println("ServeHTTP finished!")
-
 }
 
 func PingHandler(w http.ResponseWriter, r *http.Request) {
-	pingres := tools.Ping("192.168.6.5")
-	// pingres.MaxDelay + "','" + pingres.MinDelay + "','" + pingres.AvgDelay + "','" + pingres.SendPk + "','" + pingres.RevcPk + "','" + pingres.LossPk
-	fmt.Println(pingres)
-	w.Write([]byte(pingres.SendPk))
-	//type Target struct {
-	//Name        string
-	//Addr        string
-	//Type        string
-	//Thdchecksec int
-	//Thdoccnum   int
-	//Thdavgdelay int
-	//Thdloss     int
-	//}
+	var data string
+
+	if r.Method == "POST" {
+		data = r.PostFormValue("data")
+		items := strings.Split(data, ",")
+		fmt.Println("itesms:", items)
+
+		pingData:= []tools.PingSt{}
+		for i := 0; i < len(items); i++ {
+			pingres := tools.Ping(items[i])
+			pingData = append(pingData, pingres)
+
+
+		}
+		retData,err := json.Marshal(pingData)
+		checkError(err)
+		w.Header().Set("Content-type","application/json")
+		_,err = w.Write(retData)
+		checkError(err)
+	}
+
+
+	if r.Method == "GET" {
+		w.Write([]byte("Please use Post!"))
+	}
 }
 
 const (
 	mySigningKey = "WOW,MuchShibe,ToDogge"
 )
-
-//type Info struct {
-//	user string
-//	exp  int64
-//}
 
 type Claims map[string]interface{}
 
@@ -154,30 +146,29 @@ func ListServerHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("ListServer finishied")
 }
 func GetServersHandler(w http.ResponseWriter, r *http.Request) {
-
 	var sql_select string
-	var page,pagesize int
-	var offset,limit string
+	var page, pagesize int
+	var offset, limit string
 	if r.Method == "GET" {
 		queryForm, err := url.ParseQuery(r.URL.RawQuery)
 		checkError(err)
 		r.ParseForm()
 		limit = queryForm["size"][0]
 		page, _ = strconv.Atoi(queryForm["page"][0])
-	}else if r.Method == "POST" {
+	} else if r.Method == "POST" {
 		//r.MultipartForm.Value["id"]
 		limit = r.PostFormValue("size")
-		page,_ = strconv.Atoi(r.PostFormValue("page"))
+		page, _ = strconv.Atoi(r.PostFormValue("page"))
 	}
-	pagesize,_ = strconv.Atoi(limit)
+	pagesize, _ = strconv.Atoi(limit)
 	offset = strconv.Itoa(page*pagesize - pagesize)
 
-	fmt.Println("offset: ",offset)
-	fmt.Println("limit: ",limit)
+	fmt.Println("offset: ", offset)
+	fmt.Println("limit: ", limit)
 	//{sortOrder: "asc", pageSize: 10, pageNumber: 1}
 	//sql_select = "select hostname,inet_ntoa(ip1) as ip,os,platform,ip2,ip3 from servers LIMIT 10 OFFSET 10"
-	sql_select = "select server_id,hostname,inet_ntoa(ip1) as ip,os,platform,ip2,ip3 from servers LIMIT " + limit +" OFFSET " +offset
-	paging := getServers(sql_select,pagesize)
+	sql_select = "select server_id,hostname,inet_ntoa(ip1) as ip,os,platform,ip2,ip3 from servers LIMIT " + limit + " OFFSET " + offset
+	paging := getServers(sql_select, pagesize)
 	json_paging, err := json.Marshal(paging)
 	checkError(err)
 	w.Header().Set("Content-type", "application/json")
@@ -187,24 +178,21 @@ func GetServersHandler(w http.ResponseWriter, r *http.Request) {
 }
 func DelServersHandler(w http.ResponseWriter, r *http.Request) {
 	var data string
-    var items []string
+	var items []string
 	if r.Method == "POST" {
 		data = r.PostFormValue("data")
-		if(data !=""){
-			items = strings.Split(data,",")
+		if data != "" {
+			items = strings.Split(data, ",")
 		}
-
 	}
-	fmt.Println("itesms:",items)
-	for i:=0;i<len(items);i++ {
+	fmt.Println("itesms:", items)
+	for i := 0; i < len(items); i++ {
 		go delServer(items[i])
 	}
-
 	w.Write([]byte("ok"))
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-
 	cookieToken, err := r.Cookie("token")
 	if err == nil {
 		fmt.Println("cookie：", cookieToken)
@@ -261,8 +249,6 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-
-
 func InfraHandler(w http.ResponseWriter, r *http.Request) {
 	dumx := Authentication{Name: "guest", Token: "guest"}
 	param := Parameter{Title: "Infra Manager", Auth: dumx}
@@ -293,7 +279,7 @@ func checkUser(username string, userpw string) string {
 
 	return uname
 }
-func delServer(hostname string ) string{
+func delServer(hostname string) string {
 	db, err := sql.Open("mysql", "root:pa55word@tcp(192.168.6.5:3306)/test?charset=utf8")
 	checkError(err)
 	defer db.Close()
@@ -306,9 +292,9 @@ func delServer(hostname string ) string{
 	return "Deleted: " + fmt.Sprintf("%d", num) + " row"
 }
 
-func getServers(sql_select string,pagesize int ) Paging {
+func getServers(sql_select string, pagesize int) Paging {
 	paging := Paging{}
-	var totalrow,totalpage int
+	var totalrow, totalpage int
 	db, err := sql.Open("mysql", "root:pa55word@tcp(192.168.6.5:3306)/test?charset=utf8")
 	checkError(err)
 	defer db.Close()
@@ -324,7 +310,7 @@ func getServers(sql_select string,pagesize int ) Paging {
 	var hostname, ip, platform, os_filed, ip2, ip3 string
 	var server_id int
 	for rows.Next() {
-		rows.Scan(&server_id,&hostname, &ip, &platform, &os_filed, &ip2, &ip3)
+		rows.Scan(&server_id, &hostname, &ip, &platform, &os_filed, &ip2, &ip3)
 		server.ID = server_id
 		server.Hostname = hostname
 		server.IP = ip
@@ -337,10 +323,10 @@ func getServers(sql_select string,pagesize int ) Paging {
 	db.Close()
 
 	if totalrow%pagesize == 0 {
-		totalpage = totalrow/pagesize
-	}else{
-		totalpage = totalrow/pagesize +1
+		totalpage = totalrow / pagesize
+	} else {
+		totalpage = totalrow/pagesize + 1
 	}
-	paging = Paging{Last_page:totalpage,Data:servers}
+	paging = Paging{Last_page: totalpage, Data: servers}
 	return paging
 }
