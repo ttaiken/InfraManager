@@ -255,10 +255,8 @@ func InfraHandler(w http.ResponseWriter, r *http.Request) {
 	//onlineUser := OnlineUser{User: []*Person{&dumx, &chxd}}
 	//t := template.New("Person template")
 	//t, err := t.Parse(templ)
-	t, err := template.ParseFiles("templates/nav.html", "templates/infra.html")
+	t, err := template.ParseFiles("templates/layout.html", "templates/listserver.html")
 	checkError(err)
-
-	//err = t.Execute(w, param)
 	err = t.ExecuteTemplate(w, "layout", param)
 	checkError(err)
 }
