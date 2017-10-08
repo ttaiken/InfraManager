@@ -3,10 +3,11 @@ package main
 import (
 	"InfraManager/auth"
 	"InfraManager/tools"
+	"InfraManager/conf"
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
+	//"github.com/dgrijalva/jwt-go"
 	_ "github.com/go-sql-driver/mysql"
 	"html"
 	"html/template"
@@ -17,13 +18,18 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
 )
 
 func main() {
+	cfg := conf.ParseConfig()
 	http.Handle("/", &Router{config: make(map[string]interface{})})
-	http.Handle("/bootstrap/", http.StripPrefix("/", http.FileServer(http.Dir("./static/"))))
-	//http.HandleFunc("/login", LoginHandler)
-	log.Fatal(http.ListenAndServe(":80", nil))
+	fmt.Println("staticfiles: ",cfg.StaticFiles)
+	//http.Handle("/bootstrap/", http.StripPrefix("/", http.FileServer(http.Dir("./static/"))))
+	http.Handle("/bootstrap/", http.StripPrefix("/", http.FileServer(http.Dir(cfg.StaticFiles))))
+	fmt.Println("port: ",":"+strconv.Itoa(cfg.Port))
+	//log.Fatal(http.ListenAndServe(":80", nil))
+	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(cfg.Port), nil))
 }
 
 type Server struct {
@@ -46,6 +52,37 @@ type Router struct {
 }
 
 func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	cookieToken, err := r.Cookie("authtoken")
+	fmt.Println("err:",err,"cookie:",cookieToken)
+	if err == nil {
+		token, err := auth.TokenParse(cookieToken.Value, mySigningKey)
+		fmt.Println("err:",err,"token:",token)
+		if  token != nil {
+			//fmt.Println("token: ", token)
+			//claims, _ := token.Claims.(jwt.MapClaims)
+			//fmt.Println("claims: ", claims)
+			//tmpname := claims["user"].(string)
+			//fmt.Println("tmpuser: ", tmpname)
+			//dumx := Authentication{Name: tmpname, Token: cookieToken.Value}
+			//fmt.Println("dumx: ", dumx)
+			//param := Parameter{Title: "Login Page", Auth: dumx}
+			//t := template.New("hello template")
+			//t, _ = t.Parse("Hi {{.Name}}!, Do you want to logout and login again?")
+			//err := t.Execute(w, param.Auth)
+			//checkError(err)
+			CtrHandler(w,r)
+			return
+		}else{
+			LoginHandler(w,r)
+		}
+	}else{
+		//http.Redirect(w, r, "/admin/login", http.StatusFound)
+		LoginHandler(w,r)
+	}
+
+
+}
+func CtrHandler(w http.ResponseWriter, r *http.Request) {
 	var home = regexp.MustCompile(`^/$`)
 	var infra = regexp.MustCompile(`^/infra$`)
 	var infra_listServer = regexp.MustCompile(`^/infra/listserver$`)
@@ -53,7 +90,6 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var infra_delServers = regexp.MustCompile(`^/infra/delservers$`)
 	var admin_login = regexp.MustCompile(`^/admin/login$`)
 	var infra_ping = regexp.MustCompile(`^/infra/ping$`)
-
 	switch {
 	case home.MatchString(r.URL.Path):
 		HomeHandler(w, r)
@@ -72,11 +108,12 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case infra_ping.MatchString(r.URL.Path):
 		PingHandler(w, r)
 	default:
-		//fmt.Fprintf(w, "err:Not Registed to %q", html.EscapeString(r.URL.Path))
 		fmt.Fprintf(w, "err:\"Not Registed to "+html.EscapeString(r.URL.Path)+"\"")
 	}
 	fmt.Println("ServeHTTP finished!")
 }
+
+
 
 func PingHandler(w http.ResponseWriter, r *http.Request) {
 	var data string
@@ -130,6 +167,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	//err = t.Execute(w, param)
 	dumx := Authentication{Name: "guest", Token: "guest"}
 	param := Parameter{Title: "Infra Manager", Auth: dumx}
+	//t, err := template.ParseFiles("templates/layout.html", "templates/home.html")
 	t, err := template.ParseFiles("templates/layout.html", "templates/home.html")
 	checkError(err)
 	err = t.ExecuteTemplate(w, "layout", param)
@@ -193,27 +231,7 @@ func DelServersHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	cookieToken, err := r.Cookie("token")
-	if err == nil {
-		fmt.Println("cookie：", cookieToken)
-		fmt.Println("cookie value: ", cookieToken.Value)
-		token, ok := auth.TokenParse(cookieToken.Value, mySigningKey)
-		if ok == "ok" {
-			fmt.Println("token: ", token)
-			claims, _ := token.Claims.(jwt.MapClaims)
-			fmt.Println("claims: ", claims)
-			tmpname := claims["user"].(string)
-			fmt.Println("tmpuser: ", tmpname)
-			dumx := Authentication{Name: tmpname, Token: cookieToken.Value}
-			fmt.Println("dumx: ", dumx)
-			param := Parameter{Title: "Login Page", Auth: dumx}
-			t := template.New("hello template")
-			t, _ = t.Parse("Hi {{.Name}}!, Do you want to logout and login again?")
-			err := t.Execute(w, param.Auth)
-			checkError(err)
-			return
-		}
-	}
+
 	if r.Method == "GET" {
 		dumx := Authentication{Name: "guest", Token: "guest"}
 		param := Parameter{Title: "Infra Manager", Auth: dumx}
@@ -231,22 +249,20 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 			tmpuser = "nouser"
 		}
 		token, err := auth.TokenNew([]byte(mySigningKey), tmpuser)
+		checkError(err)
+		//userCredential := Authentication{Name: tmpuser, Token: token}
+		//param := Parameter{Title: tmpuser, Auth: userCredential}
 
-		userCredential := Authentication{Name: tmpuser, Token: token}
-		param := Parameter{Title: tmpuser, Auth: userCredential}
-
-		cookie1 := http.Cookie{
-			Name:  "token",
+		cookie1 := &http.Cookie{
+			Name:  "authtoken",
 			Value: token,
+			Domain: "192.168.6.1",
+			Path:"/",
 		}
 		w.Header().Set("Set-Cookie", cookie1.String())
-
-		t := template.New("hello template")
-		t, _ = t.Parse("welecome {{.Token}}!")
-		checkError(err)
-		err = t.Execute(w, param.Auth)
-		checkError(err)
-	}
+		//http.SetCookie(w,cookie1)
+		HomeHandler(w, r)
+		}
 }
 
 func InfraHandler(w http.ResponseWriter, r *http.Request) {
@@ -272,9 +288,9 @@ func checkUser(username string, userpw string) string {
 	db, err := sql.Open("mysql", "root:pa55word@tcp(192.168.6.5:3306)/test?charset=utf8")
 	checkError(err)
 	defer db.Close()
-	row := db.QueryRow("SELECT user_name,user_pw FROM auth WHERE user_name=? and user_pw=?", username, userpw)
+	row := db.QueryRow("SELECT username,userpw FROM user WHERE username=? and userpw=?", username, userpw)
 	err = row.Scan(&uname, &upw)
-
+	checkError(err)
 	return uname
 }
 func delServer(hostname string) string {

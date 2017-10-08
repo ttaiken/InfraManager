@@ -20,6 +20,7 @@
       <root url="file://$PROJECT_DIR$/../qor-example-master" />
       <root url="file://$PROJECT_DIR$/../rtop-master" />
       <root url="file://$PROJECT_DIR$/../mtools" />
+      <root url="file://$PROJECT_DIR$/../conf" />
     </CLASSES>
     <SOURCES>
       <root url="file://$PROJECT_DIR$/../go.uber.org" />
@@ -41,6 +42,7 @@
       <root url="file://$PROJECT_DIR$/../qor-example-master" />
       <root url="file://$PROJECT_DIR$/../rtop-master" />
       <root url="file://$PROJECT_DIR$/../mtools" />
+      <root url="file://$PROJECT_DIR$/../conf" />
     </SOURCES>
     <excluded>
       <root url="file://$PROJECT_DIR$" />

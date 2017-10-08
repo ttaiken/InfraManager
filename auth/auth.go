@@ -16,20 +16,21 @@ func TokenNew(mySigningKey []byte, username string) (string, error) {
 	return tokenString, err
 }
 
-func TokenParse(myToken string, myKey string) (*jwt.Token, string) {
+func TokenParse(myToken string, myKey string) (*jwt.Token, error) {
 	token, err := jwt.Parse(myToken, func(token *jwt.Token) (interface{}, error) {
 		return []byte(myKey), nil
 	})
-
+	if err!=nil {
+		fmt.Println(err)
+	}
 	if err == nil && token.Valid {
 		//claims := token.Claims
-		if token.Valid {
-			return token, "ok"
-		}
-		return nil, "can not get claims"
+
+		return token, nil
+
 	} else {
 		fmt.Println("This token is terrible!  I cannot accept this.")
-		return nil, "InvaildToken"
+		return nil,err
 	}
 
 }

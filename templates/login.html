@@ -1,6 +1,6 @@
 {{ define "content" }}
 <div id="cnotent">
-    <form class="form-horizontal">
+    <form class="form-horizontal" action="/admin/login" method="post">
         <div class="form-group">
             <label class="col-lg-3 control-label">Username</label>
             <div class="col-lg-9">
@@ -18,6 +18,9 @@
             <div class="col-lg-9">
                 <input type="Password" class="form-control" name="userpw" />
             </div>
+        </div>
+        <div class="form-group">
+            <input type="submit">
         </div>
     </form>
 
