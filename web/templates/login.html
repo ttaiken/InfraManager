@@ -1,0 +1,40 @@
+{{ define "content" }}
+<div id="cnotent">
+    <form class="form-horizontal" action="/admin/login" method="post">
+        <div class="form-group">
+            <label class="col-lg-3 control-label">Username</label>
+            <div class="col-lg-9">
+                <input type="text" class="form-control" name="username" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg-3 control-label">Email address</label>
+            <div class="col-lg-9">
+                <input type="text" class="form-control" name="email" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg-3 control-label">User Password</label>
+            <div class="col-lg-9">
+                <input type="Password" class="form-control" name="userpw" />
+            </div>
+        </div>
+        <div class="form-group">
+            <input type="submit">
+        </div>
+    </form>
+
+</div>
+
+{{end}}
+
+{{ define "customizeScript" }}
+<script>
+$(document).ready(function() {
+  
+
+});
+
+
+</script>
+{{end}}

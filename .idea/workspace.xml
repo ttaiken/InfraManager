@@ -1,17 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2ffa8222-672d-4863-940f-1b74d815bedd" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/conf/conf.go" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/conf/struct.go" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/config.json" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/InfraManager.exe" afterPath="$PROJECT_DIR$/InfraManager.exe" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/GOPATH__InfraManager_.xml" afterPath="$PROJECT_DIR$/.idea/libraries/GOPATH__InfraManager_.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/auth/auth.go" afterPath="$PROJECT_DIR$/auth/auth.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.go" afterPath="$PROJECT_DIR$/main.go" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/login.html" afterPath="$PROJECT_DIR$/templates/login.html" />
-    </list>
+    <list default="true" id="2ffa8222-672d-4863-940f-1b74d815bedd" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -24,10 +14,9 @@
       <file leaf-file-name="main.go" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="299">
-              <caret line="259" column="21" lean-forward="false" selection-start-line="259" selection-start-column="21" selection-end-line="259" selection-end-column="21" />
+            <state relative-caret-position="345">
+              <caret line="15" column="13" lean-forward="true" selection-start-line="15" selection-start-column="13" selection-end-line="15" selection-end-column="13" />
               <folding>
-                <element signature="e#14#291#0" expanded="true" />
                 <marker date="1507430781120" expanded="true" signature="8328:8390" ph="SELECT user_... auth" />
                 <marker date="1507430781120" expanded="true" signature="8663:8699" ph="DELETE FROM " />
                 <marker date="1507430781120" expanded="true" signature="9126:9154" ph="select count... servers" />
@@ -91,7 +80,7 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="988" />
     <option name="y" value="92" />
     <option name="width" value="1382" />
@@ -177,8 +166,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-9" y="-9" width="1938" height="1048" extended-state="7" />
-    <editor active="true" />
+    <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
@@ -240,7 +228,6 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#14#291#0" expanded="true" />
             <marker date="1507430781120" expanded="true" signature="8328:8390" ph="SELECT user_... auth" />
             <marker date="1507430781120" expanded="true" signature="8663:8699" ph="DELETE FROM " />
             <marker date="1507430781120" expanded="true" signature="9126:9154" ph="select count... servers" />
@@ -271,7 +258,6 @@
         <state relative-caret-position="782">
           <caret line="34" column="20" lean-forward="false" selection-start-line="34" selection-start-column="20" selection-end-line="34" selection-end-column="31" />
           <folding>
-            <element signature="e#14#291#0" expanded="true" />
             <marker date="1507430781120" expanded="true" signature="8328:8390" ph="SELECT user_... auth" />
             <marker date="1507430781120" expanded="true" signature="8663:8699" ph="DELETE FROM " />
             <marker date="1507430781120" expanded="true" signature="9126:9154" ph="select count... servers" />
@@ -305,7 +291,6 @@
         <state relative-caret-position="276">
           <caret line="29" column="0" lean-forward="false" selection-start-line="29" selection-start-column="0" selection-end-line="35" selection-end-column="32" />
           <folding>
-            <element signature="e#14#291#0" expanded="true" />
             <marker date="1507430781120" expanded="true" signature="8328:8390" ph="SELECT user_... auth" />
             <marker date="1507430781120" expanded="true" signature="8663:8699" ph="DELETE FROM " />
             <marker date="1507430781120" expanded="true" signature="9126:9154" ph="select count... servers" />
@@ -325,7 +310,6 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#14#291#0" expanded="true" />
             <marker date="1507430781120" expanded="true" signature="8328:8390" ph="SELECT user_... auth" />
             <marker date="1507430781120" expanded="true" signature="8663:8699" ph="DELETE FROM " />
             <marker date="1507430781120" expanded="true" signature="9126:9154" ph="select count... servers" />
@@ -345,7 +329,6 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#14#291#0" expanded="true" />
             <marker date="1507430781120" expanded="true" signature="8328:8390" ph="SELECT user_... auth" />
             <marker date="1507430781120" expanded="true" signature="8663:8699" ph="DELETE FROM " />
             <marker date="1507430781120" expanded="true" signature="9126:9154" ph="select count... servers" />
@@ -365,7 +348,6 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#14#291#0" expanded="true" />
             <marker date="1507430781120" expanded="true" signature="8328:8390" ph="SELECT user_... auth" />
             <marker date="1507430781120" expanded="true" signature="8663:8699" ph="DELETE FROM " />
             <marker date="1507430781120" expanded="true" signature="9126:9154" ph="select count... servers" />
@@ -385,7 +367,6 @@
         <state relative-caret-position="1909">
           <caret line="83" column="23" lean-forward="false" selection-start-line="83" selection-start-column="23" selection-end-line="83" selection-end-column="23" />
           <folding>
-            <element signature="e#14#291#0" expanded="true" />
             <marker date="1507430781120" expanded="true" signature="8328:8390" ph="SELECT user_... auth" />
             <marker date="1507430781120" expanded="true" signature="8663:8699" ph="DELETE FROM " />
             <marker date="1507430781120" expanded="true" signature="9126:9154" ph="select count... servers" />
@@ -405,7 +386,6 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#14#291#0" expanded="true" />
             <marker date="1507430781120" expanded="true" signature="8328:8390" ph="SELECT user_... auth" />
             <marker date="1507430781120" expanded="true" signature="8663:8699" ph="DELETE FROM " />
             <marker date="1507430781120" expanded="true" signature="9126:9154" ph="select count... servers" />
@@ -425,7 +405,6 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#14#291#0" expanded="true" />
             <marker date="1507430781120" expanded="true" signature="8328:8390" ph="SELECT user_... auth" />
             <marker date="1507430781120" expanded="true" signature="8663:8699" ph="DELETE FROM " />
             <marker date="1507430781120" expanded="true" signature="9126:9154" ph="select count... servers" />
@@ -453,7 +432,6 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#14#291#0" expanded="true" />
             <marker date="1507430781120" expanded="true" signature="8328:8390" ph="SELECT user_... auth" />
             <marker date="1507430781120" expanded="true" signature="8663:8699" ph="DELETE FROM " />
             <marker date="1507430781120" expanded="true" signature="9126:9154" ph="select count... servers" />
@@ -481,7 +459,6 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#14#291#0" expanded="true" />
             <marker date="1507430781120" expanded="true" signature="8328:8390" ph="SELECT user_... auth" />
             <marker date="1507430781120" expanded="true" signature="8663:8699" ph="DELETE FROM " />
             <marker date="1507430781120" expanded="true" signature="9126:9154" ph="select count... servers" />
@@ -509,7 +486,6 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#14#291#0" expanded="true" />
             <marker date="1507430781120" expanded="true" signature="8328:8390" ph="SELECT user_... auth" />
             <marker date="1507430781120" expanded="true" signature="8663:8699" ph="DELETE FROM " />
             <marker date="1507430781120" expanded="true" signature="9126:9154" ph="select count... servers" />
@@ -522,7 +498,6 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#14#291#0" expanded="true" />
             <marker date="1507430781120" expanded="true" signature="8328:8390" ph="SELECT user_... auth" />
             <marker date="1507430781120" expanded="true" signature="8663:8699" ph="DELETE FROM " />
             <marker date="1507430781120" expanded="true" signature="9126:9154" ph="select count... servers" />
@@ -535,7 +510,6 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#14#291#0" expanded="true" />
             <marker date="1507430781120" expanded="true" signature="8328:8390" ph="SELECT user_... auth" />
             <marker date="1507430781120" expanded="true" signature="8663:8699" ph="DELETE FROM " />
             <marker date="1507430781120" expanded="true" signature="9126:9154" ph="select count... servers" />
@@ -548,7 +522,6 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#14#291#0" expanded="true" />
             <marker date="1507430781120" expanded="true" signature="8328:8390" ph="SELECT user_... auth" />
             <marker date="1507430781120" expanded="true" signature="8663:8699" ph="DELETE FROM " />
             <marker date="1507430781120" expanded="true" signature="9126:9154" ph="select count... servers" />
@@ -670,10 +643,9 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/main.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="299">
-          <caret line="259" column="21" lean-forward="false" selection-start-line="259" selection-start-column="21" selection-end-line="259" selection-end-column="21" />
+        <state relative-caret-position="345">
+          <caret line="15" column="13" lean-forward="true" selection-start-line="15" selection-start-column="13" selection-end-line="15" selection-end-column="13" />
           <folding>
-            <element signature="e#14#291#0" expanded="true" />
             <marker date="1507430781120" expanded="true" signature="8328:8390" ph="SELECT user_... auth" />
             <marker date="1507430781120" expanded="true" signature="8663:8699" ph="DELETE FROM " />
             <marker date="1507430781120" expanded="true" signature="9126:9154" ph="select count... servers" />
