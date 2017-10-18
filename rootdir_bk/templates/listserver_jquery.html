@@ -1,0 +1,110 @@
+{{ define "content" }}
+
+<div class="panel panel-info" id="cnotent">
+    <div class="panel-heading">
+        <p>ServerList</p>
+        Functions:
+        <button id="add-row">Add Row</button>
+        <button id="delete-row">Delete Row</button>
+        <button id="history-undo">Undo</button>
+        <button type="button" id="history-redo">Redo</button>
+             
+    </div>
+    <div>
+        <table class="table table-hover" id="table-servers" data-URL="/infra/getservers">
+            <thead>
+                <tr>
+                    <th width=10px><input type="checkbox" id="checkall" ></th>
+                    <th>hostname</th>
+                    <th>ip</th>
+                    <th>os</th>
+                    <th>platform</th>
+                    <th>opration</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+          <div>
+            <ul id="table-ser-pag" class="pagination" data-pnum=1 data-psize=5 >
+
+            </ul>
+        </div>
+    </div>
+</div>
+
+{{end}}
+{{ define "customizeScript" }}
+<script>
+$(document).ready(function() {
+    //var pagenum = 1;
+    //var pagesize = 5;
+    //var apiURL="/infra/getservers";
+    listServers(1,5);
+
+    
+
+});
+function listServers(pagenum,pagesize){
+        var apiURL = $("#table-servers").attr("data-URL");
+        $('[class="pagination"]').attr("data-pnum",pagenum);
+        $('[class="pagination"]').attr("data-psize",pagesize);
+        $.ajax({
+            url:apiURL,  
+            data:"page=" + pagenum + "&size=" + pagesize,
+            dataType: "json",
+            type:'post',  
+            success:function(data){  
+                var item;
+                $("table tbody").empty(); 
+                $("#table-servers").show(); 
+                $.each(data['data'],function(i,result){  
+
+                    item = "<tr><td><input type='checkbox' name='checkitem' value='" +result['hostname'] +
+                            "'></td><td>"+result['hostname']+"</td><td>"+result['ip']+
+                            "</td><td>"+result['os']+"</td><td>"+result['platform']+
+                            "</td><td>"+"操作</td></tr>";  
+                    $('#table-servers').append(item);
+                    
+                });  
+
+                $('[class="pagination"]').empty(); 
+                $('[class="pagination"]').append('<li><a href="#">&laquo;</a></li>');
+                var lastPage = data['last_page']
+                for(var i = 1; i<=lastPage; i++){
+                    
+                    if(i==pagenum){
+                        var li_html = '<li class="active"><a href="#">' + i + '</a></li>'
+                    }else{
+                        var li_html = '<li><a href="javascript:void(0);" onclick="listServers('+i+',5)">' + i + '</a></li>'
+                    }
+                    $('[class="pagination"]').append(li_html);
+                }
+                $('[class="pagination"]').append('<li><a href="#">&raquo;</a></li>');
+            }
+              
+        });
+            
+    }
+
+    $("#add-row").on("click", function(){
+        
+      });
+    $("#delete-row").on("click", function(){
+        var items = [];
+        item=$('[name="checkitem"]:checked').each(function(index,elem){
+            items.push($(this).val());}); 
+        window.alert(items);
+        //$("#table-servers").tabulator("addRow",{} , true ); 
+      });
+    
+    $("#checkall").on("click",function(){
+        if(this.checked){
+            $("[name=checkitem]").attr("checked",true);
+        }else{ 
+            $("[name=checkitem]").attr("checked",false);
+        }
+    });
+
+</script>
+{{end}}

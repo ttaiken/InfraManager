@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html" charset="utf-8">
+    <title>InfraManager</title>
+
+      <link href="static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+      <!-- 注意： 如果通过 file://  引入 Respond.js 文件，则该文件无法起效果 -->
+      <!--[if lt IE 9]>
+         <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+         <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+      <![endif]-->
+  </head>
+<body>
+
+
+<div class="container">
+  <div class="row">
+
+    <!--Begin Header Navigation -->
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+      <nav class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+            data-target="#navbar-collapse-1">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/imhome.html">InfraManager</a>
+          </div>
+          
+          <div class="collapse navbar-collapse" id="navbar-collapse-1">
+            <ul class="nav navbar-nav">
+              <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    Admin<i class="caret"></i>
+                  </a>
+                  <ul class="dropdown-menu">
+                      <li><a href="#/admin/login">Login</a></li>
+                      <li><a href="#">AddUser</a></li>
+                      <li class="divider"></li>
+                      <li><a href="#">ChangePassword</a></li>
+                  </ul>
+
+              </li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                  Servers<b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a href="#/infra/listserver">ServerList</a></li>
+                  <li><a href="/infra/getservers?page=1&size=5">AddServer</a></li>
+                  <li><a href="/infra/ping">Ping</a></li>
+                </ul>
+              </li>
+              <li class="dropdown">
+                  <a href="#">Tasks</a>                 
+              </li>
+            </ul>
+          
+            <ul id="checkuser" class="nav navbar-nav navbar-right">                 
+              <!-- BEGIN USER LOGIN DROPDOWN -->
+              <li class="dropdown user">
+                <!--
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                  <img alt="" src="image/avatar1_small.jpg" />
+                  <span class="username">Bob Nilson</span>
+                  <i class="caret"></i>
+                </a>
+                -->
+                <a href="#/admin/login" >
+                  <span class="glyphicon glyphicon-log-in"></span> Login
+                </a> 
+
+              </li>
+              <!-- END USER LOGIN DROPDOWN -->
+
+            </ul> 
+          </div>
+        </div>   
+      </nav>        
+    </div>
+    <!-- End Header Navigation -->
+  </div>
+</div>
+
+<div class="container">
+  <div class="row" id="main-content">
+    <!-- Begin main content -->
+ 
+    
+    <!-- End main content -->       
+  </div>
+</div>
+   
+
+
+
+<!-- jQuery (Bootstrap 的 JavaScript 插件需要引入 jQuery) -->
+<script src="static/bootstrap/js/jquery.min.js"></script>
+<!-- 包括所有已编译的插件 -->
+<script src="static/bootstrap/js/bootstrap.min.js"></script>
+<script src="static/director/director.min.js"> </script>
+<script>
+  jQuery(document).ready(function() {       
+    // initiate layout
+    $("#side-bar").removeAttr("style"); 
+    $("#side-bar").attr("style","display:none;"); 
+    //$("#checkuser").empty();
+    $("#checkuser").append("<li><a href='/admin/logout'>logout</a></li>")
+
+    //----director-router-------
+
+    var admin_login = function () { 
+      
+      $("#main-content").html('<span class="col-md-offset-3 col-md-6" >loading,please wait a moment!</span>');
+      $.ajax({
+        url:"/im_admin_login.html",  
+        dataType: "html",
+        type:'get',  
+        success:function(data){$("#main-content").html(data);}
+      });
+    };
+
+    var infra_listserver = function () { 
+      
+      $("#main-content").html('<span class="col-md-offset-3 col-md-6" >loading,please wait a moment!</span>');
+      $.ajax({
+        url:"/im_infra_listserver.html",  
+        dataType: "html",
+        type:'get',  
+        success:function(data){$("#main-content").html(data);}
+      });
+    };
+
+    var viewBook = function (bookId) {
+      console.log("viewBook: bookId is populated: " + bookId);
+    };
+
+    var routes = {
+      '/admin/login': admin_login,
+      '/infra/listserver': infra_listserver,
+      '/books/view/:bookId': [viewBook, function() {
+        console.log("An inline route handler.");
+      }],
+    };
+
+    var router = Router(routes);
+    router.init();
+
+  });
+
+</script>
+
+</body>
+</html>

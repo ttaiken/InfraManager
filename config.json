@@ -1,9 +1,9 @@
 {
 	"hostname": "localhost",
-	"ip":"192.168.6.1",
-	"port": 80,
-	"templates": "D:/pjs/go/src/InfraManager/templates",
-	"staticfiles": "D:/pjs/Go/src/InfraManager/static",
+	"ip":"127.0.0.1",
+	"port": 8000,
+	"templates": "/root/go/src/InfraManager/templates",
+	"staticfiles": "/root/Go/src/InfraManager/static",
 	"menulist": [
 		{
 			"name": "test1",

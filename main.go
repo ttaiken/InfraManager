@@ -23,10 +23,11 @@ import (
 
 func main() {
 	cfg := conf.ParseConfig()
+
 	http.Handle("/", &Router{config: make(map[string]interface{})})
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./rootdir/static/"))))
 	fmt.Println("staticfiles: ",cfg.StaticFiles)
-	//http.Handle("/bootstrap/", http.StripPrefix("/", http.FileServer(http.Dir("./static/"))))
-	http.Handle("/bootstrap/", http.StripPrefix("/", http.FileServer(http.Dir(cfg.StaticFiles))))
+	//http.Handle("/bootstrap/", http.StripPrefix("/", http.FileServer(http.Dir(cfg.StaticFiles))))
 	fmt.Println("port: ",":"+strconv.Itoa(cfg.Port))
 	//log.Fatal(http.ListenAndServe(":80", nil))
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(cfg.Port), nil))
@@ -52,61 +53,66 @@ type Router struct {
 }
 
 func (router *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	authinfo := new(auth.Authentication)
 	cookieToken, err := r.Cookie("authtoken")
-	fmt.Println("err:",err,"cookie:",cookieToken)
-	if err == nil {
-		token, err := auth.TokenParse(cookieToken.Value, mySigningKey)
-		fmt.Println("err:",err,"token:",token)
-		if  token != nil {
-			//fmt.Println("token: ", token)
-			//claims, _ := token.Claims.(jwt.MapClaims)
-			//fmt.Println("claims: ", claims)
-			//tmpname := claims["user"].(string)
-			//fmt.Println("tmpuser: ", tmpname)
-			//dumx := Authentication{Name: tmpname, Token: cookieToken.Value}
-			//fmt.Println("dumx: ", dumx)
-			//param := Parameter{Title: "Login Page", Auth: dumx}
-			//t := template.New("hello template")
-			//t, _ = t.Parse("Hi {{.Name}}!, Do you want to logout and login again?")
-			//err := t.Execute(w, param.Auth)
-			//checkError(err)
-			CtrHandler(w,r)
-			return
-		}else{
-			LoginHandler(w,r)
-		}
-	}else{
-		//http.Redirect(w, r, "/admin/login", http.StatusFound)
-		LoginHandler(w,r)
+
+
+	if err!=nil || cookieToken.Value == ""{
+		//http.Redirect(w, r, "/login.html", http.StatusFound)
+		//return
+		authinfo,_ = auth.TokenParse("", mySigningKey)
+	}else {
+		fmt.Print("info:cookieToen is running.")
+		authinfo,_ = auth.TokenParse(cookieToken.Value, mySigningKey)
 	}
 
-
+	var admin_checkrole = regexp.MustCompile(`^/admin/checkrole$`)
+	var admin_login = regexp.MustCompile(`^/admin/login$`)
+	switch {
+	case admin_checkrole.MatchString(r.URL.Path):
+		//确认是否登陆api，不需要登陆也可以访问
+		CheckroleHandler(w, r,authinfo)
+	case admin_login.MatchString(r.URL.Path):
+		//希望登陆，处理登陆
+	    LoginHandler(w, r,authinfo)
+	    //http.Redirect(w, r, "/login.html", http.StatusFound)
+	case authinfo.Name == "guest":
+		//没有登陆的用户，访问不允许的网页，重新定向到登陆界面
+	    LoginHandler(w,r,authinfo)
+	default:
+		//登陆用户，继续确认用户需要登录的界面
+		CtrHandler(w,r,authinfo)
+	}
 }
-func CtrHandler(w http.ResponseWriter, r *http.Request) {
+func CtrHandler(w http.ResponseWriter, r *http.Request,authinfo *auth.Authentication){
 	var home = regexp.MustCompile(`^/$`)
 	var infra = regexp.MustCompile(`^/infra$`)
 	var infra_listServer = regexp.MustCompile(`^/infra/listserver$`)
 	var infra_getServers = regexp.MustCompile(`^/infra/getservers$`)
 	var infra_delServers = regexp.MustCompile(`^/infra/delservers$`)
-	var admin_login = regexp.MustCompile(`^/admin/login$`)
 	var infra_ping = regexp.MustCompile(`^/infra/ping$`)
+	var admin_login = regexp.MustCompile(`^/admin/login$`)
+	var admin_checkrole = regexp.MustCompile(`^/admin/checkrole$`)
+
 	switch {
 	case home.MatchString(r.URL.Path):
-		HomeHandler(w, r)
+		HomeHandler(w, r,authinfo)
 	case infra.MatchString(r.URL.Path):
-		InfraHandler(w, r)
+		InfraHandler(w, r,authinfo)
 	case infra_listServer.MatchString(r.URL.Path):
 		fmt.Println("Forward to ListServerHandler")
-		ListServerHandler(w, r)
+		ListServerHandler(w, r,authinfo)
 
 	case infra_getServers.MatchString(r.URL.Path):
 		GetServersHandler(w, r)
 	case infra_delServers.MatchString(r.URL.Path):
 		DelServersHandler(w, r)
 	case admin_login.MatchString(r.URL.Path):
-		LoginHandler(w, r)
+		LoginHandler(w, r,authinfo)
 	case infra_ping.MatchString(r.URL.Path):
 		PingHandler(w, r)
+	case admin_checkrole.MatchString(r.URL.Path):
+		CheckroleHandler(w, r,authinfo)
 	default:
 		fmt.Fprintf(w, "err:\"Not Registed to "+html.EscapeString(r.URL.Path)+"\"")
 	}
@@ -147,39 +153,24 @@ const (
 	mySigningKey = "WOW,MuchShibe,ToDogge"
 )
 
-type Claims map[string]interface{}
-
-type Authentication struct {
-	Name  string
-	Token string
-}
-
-type Parameter struct {
-	Title   string
-	Auth    Authentication
-	Servers []Server
-}
-
-func HomeHandler(w http.ResponseWriter, r *http.Request) {
+func HomeHandler(w http.ResponseWriter, r *http.Request,authinfo *auth.Authentication) {
 	//dir, _ := os.Getwd()
 	//t, err := template.ParseFiles(filepath.Join(dir, "templates", "home.html"))
 	//checkError(err)
 	//err = t.Execute(w, param)
-	dumx := Authentication{Name: "guest", Token: "guest"}
-	param := Parameter{Title: "Infra Manager", Auth: dumx}
 	//t, err := template.ParseFiles("templates/layout.html", "templates/home.html")
 	t, err := template.ParseFiles("templates/layout.html", "templates/home.html")
 	checkError(err)
-	err = t.ExecuteTemplate(w, "layout", param)
+	err = t.ExecuteTemplate(w, "layout", authinfo)
 	checkError(err)
 }
 
-func ListServerHandler(w http.ResponseWriter, r *http.Request) {
-	dumx := Authentication{Name: "guest", Token: "guest"}
-	param := Parameter{Title: "Infra Manager", Auth: dumx}
+func ListServerHandler(w http.ResponseWriter, r *http.Request,authinfo *auth.Authentication) {
+
+
 	t, err := template.ParseFiles("templates/layout.html", "templates/listserver.html")
 	checkError(err)
-	err = t.ExecuteTemplate(w, "layout", param)
+	err = t.ExecuteTemplate(w, "layout", authinfo)
 	checkError(err)
 	fmt.Println("ListServer finishied")
 }
@@ -229,26 +220,36 @@ func DelServersHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write([]byte("ok"))
 }
+func CheckroleHandler(w http.ResponseWriter, r *http.Request, authinfo *auth.Authentication) {
 
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	json_auth, err := json.Marshal(authinfo)
+	checkError(err)
+	w.Header().Set("Content-type", "application/json")
+
+	_, err = w.Write(json_auth)
+	checkError(err)
+}
+
+func LoginHandler(w http.ResponseWriter, r *http.Request,authinfo *auth.Authentication) {
 
 	if r.Method == "GET" {
-		dumx := Authentication{Name: "guest", Token: "guest"}
-		param := Parameter{Title: "Infra Manager", Auth: dumx}
+
 		t, err := template.ParseFiles("templates/layout.html", "templates/login.html")
 		checkError(err)
-		err = t.ExecuteTemplate(w, "layout", param)
+		err = t.ExecuteTemplate(w, "layout", authinfo)
 		checkError(err)
 	} else if r.Method == "POST" {
 		username := r.FormValue("username")
 		userpw := r.FormValue("userpw")
 		tmpuser := checkUser(string(username), string(userpw))
-		fmt.Println("user is : %s", tmpuser)
+		fmt.Println("Login: %s",tmpuser)
+
 
 		if tmpuser == "" {
-			tmpuser = "nouser"
+			tmpuser = "guest"
 		}
 		token, err := auth.TokenNew([]byte(mySigningKey), tmpuser)
+
 		checkError(err)
 		//userCredential := Authentication{Name: tmpuser, Token: token}
 		//param := Parameter{Title: tmpuser, Auth: userCredential}
@@ -256,24 +257,24 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		cookie1 := &http.Cookie{
 			Name:  "authtoken",
 			Value: token,
-			Domain: "192.168.6.1",
 			Path:"/",
 		}
+		//Domain: "192.168.6.1",
 		w.Header().Set("Set-Cookie", cookie1.String())
-		//http.SetCookie(w,cookie1)
-		HomeHandler(w, r)
+	    //http.SetCookie(w,cookie1)
+
+
+		//authinfo := auth.Authentication{Name:tmpuser,Role:"admin",Token:token}
+		//HomeHandler(w, r,&authinfo)
+		http.Redirect(w, r, "/imhome.html", http.StatusFound)
 		}
 }
 
-func InfraHandler(w http.ResponseWriter, r *http.Request) {
-	dumx := Authentication{Name: "guest", Token: "guest"}
-	param := Parameter{Title: "Infra Manager", Auth: dumx}
-	//onlineUser := OnlineUser{User: []*Person{&dumx, &chxd}}
-	//t := template.New("Person template")
-	//t, err := t.Parse(templ)
+func InfraHandler(w http.ResponseWriter, r *http.Request,authinfo *auth.Authentication) {
+
 	t, err := template.ParseFiles("templates/layout.html", "templates/listserver.html")
 	checkError(err)
-	err = t.ExecuteTemplate(w, "layout", param)
+	err = t.ExecuteTemplate(w, "layout", authinfo)
 	checkError(err)
 }
 
@@ -285,16 +286,19 @@ func checkError(err error) {
 }
 func checkUser(username string, userpw string) string {
 	var uname, upw string
-	db, err := sql.Open("mysql", "root:pa55word@tcp(192.168.6.5:3306)/test?charset=utf8")
+	db, err := sql.Open("mysql", "root:pa55word@tcp(192.168.6.6:3306)/test?charset=utf8")
 	checkError(err)
 	defer db.Close()
-	row := db.QueryRow("SELECT username,userpw FROM user WHERE username=? and userpw=?", username, userpw)
-	err = row.Scan(&uname, &upw)
-	checkError(err)
+	err = db.QueryRow("SELECT username,userpw FROM user WHERE username=? and userpw=?", username, userpw).Scan(&uname, &upw)
+	//err = row.Scan(&uname, &upw)
+	if err!=nil{
+		fmt.Println(err)
+	}
+
 	return uname
 }
 func delServer(hostname string) string {
-	db, err := sql.Open("mysql", "root:pa55word@tcp(192.168.6.5:3306)/test?charset=utf8")
+	db, err := sql.Open("mysql", "root:pa55word@tcp(192.168.6.6:3306)/test?charset=utf8")
 	checkError(err)
 	defer db.Close()
 	stmt, err := db.Prepare(`DELETE FROM servers WHERE hostname=?`)
@@ -309,7 +313,7 @@ func delServer(hostname string) string {
 func getServers(sql_select string, pagesize int) Paging {
 	paging := Paging{}
 	var totalrow, totalpage int
-	db, err := sql.Open("mysql", "root:pa55word@tcp(192.168.6.5:3306)/test?charset=utf8")
+	db, err := sql.Open("mysql", "root:pa55word@tcp(192.168.6.6:3306)/test?charset=utf8")
 	checkError(err)
 	defer db.Close()
 
